@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import time
+import csv
 
 # ---------------------------------第一步: Selenium參數設定---------------------------------
 cpbl_driver = webdriver.Chrome()
@@ -48,16 +49,23 @@ for i in range(0, len(states), 27):
 # 使用 zip 函數將列表合併
 elements = zip(ranks, teams, players, states_groups)
 
-# 迭代所有元素
-for rank, team, players, states_group in elements:
-    rank_text = rank.get_text(strip=True) # strip=True 是 get_text() 方法的一個參數,用於去除文本前後的空白字符
-    team_text = team.get_text(strip=True)
-    players_text = players.get_text(strip=True)
-    states_texts = [states.get_text(strip=True) for states in states_group]
-    print(f'排名: {rank_text}')
-    print(f'球隊: {team_text}')
-    print(f'球員: {players_text}')
-    print(f'球員數據: {", ".join(states_texts)}')
-    print('-' * 80)
+# ---------------------------------第五步: 準備寫入csv---------------------------------
 
-# ---------------------------------第五步: 準備寫入csv?---------------------------------
+with open('test.csv', 'w', newline='') as csv_file:
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(['排名', '球隊', '球員', '打擊率', '出賽數', '打席', '打數', '得分', '打點', '安打', '一安', '二安', '三安', '全壘打', '累打數', '長打數', '四壞', '(故四)', '死球', '被三振', '雙殺打', '犧短', '犧飛', '盜壘', '盜壘刺', '上壘率', '長打率', '整體攻擊指數', '滾飛出局比', '保送三振比'])
+
+    # 迭代所有元素
+    for rank, team, players, states_group in elements:
+        rank_text = rank.get_text(strip=True) # strip=True 是 get_text() 方法的一個參數,用於去除文本前後的空白字符
+        team_text = team.get_text(strip=True)
+        players_text = players.get_text(strip=True)
+        states_texts = [states.get_text(strip=True) for states in states_group]
+        print(f'排名: {rank_text}')
+        print(f'球隊: {team_text}')
+        print(f'球員: {players_text}')
+        print(f'球員數據: {", ".join(states_texts)}')
+        print('-' * 80)
+
+        # 寫入 CSV，每個 states_texts 元素作為一個單獨的列
+        csv_writer.writerow([rank_text, team_text, players_text] + states_texts)
